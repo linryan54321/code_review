@@ -1,18 +1,35 @@
-name: Cppcheck CI
+name: Cppcheck Reviewdog
 
-on: [push, pull_request]
+on:
+  pull_request:
+    paths:
+      - '**/*.cpp'
+      - '**/*.h'
 
 jobs:
   cppcheck:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Install cppcheck
-        run: sudo apt-get update && sudo apt-get install cppcheck -y
+        run: sudo apt-get update && sudo apt-get install -y cppcheck
 
-      - name: Run cppcheck with checkers report
+      - name: Run cppcheck and output to file
         run: |
-          cppcheck --enable=all --inconclusive --quiet --error-exitcode=1 --checkers-report=checkers_report.txt .
-          cat checkers_report.txt
+          cppcheck --enable=all --inconclusive --quiet --template='{file}:{line}:{column}: {severity}: {message}' . 2> cppcheck.log || true
+          cat cppcheck.log
+
+      - name: Run reviewdog
+        uses: reviewdog/action-cppcheck@v1
+        with:
+          name: cppcheck
+          reporter: github-pr-review # 在 PR 裡註解錯誤
+          filter_mode: diff # 只顯示 PR 差異部分的錯誤
+          fail_on_error: true
+          level: error
+          errorformat: '%f:%l:%c: %t: %m'
+          output: ./cppcheck.log
+          github_token: ${{ secrets.GITHUB_TOKEN }}
