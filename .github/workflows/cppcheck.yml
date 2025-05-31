@@ -12,5 +12,7 @@ jobs:
       - name: Install cppcheck
         run: sudo apt-get update && sudo apt-get install cppcheck -y
 
-      - name: Run cppcheck
-        run: cppcheck --enable=all --inconclusive --quiet --error-exitcode=1 .
+      - name: Run cppcheck with checkers report
+        run: |
+          cppcheck --enable=all --inconclusive --quiet --error-exitcode=1 --checkers-report=checkers_report.txt .
+          cat checkers_report.txt
