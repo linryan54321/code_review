@@ -5,12 +5,14 @@ on: [push, pull_request]
 jobs:
   cppcheck:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install cppcheck
-        run: sudo apt-get install cppcheck -y
-
-      - name: Run cppcheck
-        run: cppcheck --enable=all --inconclusive --quiet --error-exitcode=1 .
+      - name: Run Cppcheck Action
+        uses: deep5050/cppcheck-action@v1.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          enable: all
+          std: c++17
